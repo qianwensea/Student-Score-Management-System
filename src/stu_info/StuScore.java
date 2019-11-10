@@ -16,10 +16,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneLayout;
 import javax.swing.event.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 /**
  *@classname: StuScore
  *@author: shijinhai
@@ -50,12 +54,15 @@ public class StuScore extends JFrame{
 		//排序页组件
 		JButton sot;
 		JTextArea show2;
+		JTable ta1;
+		DefaultTableModel tableModel;
 		ArrayList<Student> students = new ArrayList<Student>();
 		public StuScore() {
 			
 			fra = new JFrame("学生成绩管理系统");
-			fra.setBounds(695, 200, 500, 650);//设置位置
+			fra.setSize(500, 650);//设置位置
 			fra.setVisible(true); //设置可见
+			fra.setLocationRelativeTo(getOwner());
 			fra.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//设置可关闭
 			insert = new JPanel();
 			search = new JPanel();
@@ -135,9 +142,17 @@ public class StuScore extends JFrame{
 			sot.addActionListener(new ClickListen()); //监听sot按钮
 			show2 = new JTextArea(30,30);
 			show2.setEditable(false);
+			tableModel = new DefaultTableModel();
+			ta1 = new JTable(tableModel);
+			ta1.setEnabled(false);//设置不可编辑
+			DefaultTableCellRenderer   r   =   new   DefaultTableCellRenderer();   
+			r.setHorizontalAlignment(JLabel.CENTER);   //设置数据居中显示
+			ta1.setDefaultRenderer(Object.class,   r);
+			tableModel.addColumn("学号");
+			tableModel.addColumn("成绩");
 			Box box_st1 = Box.createHorizontalBox();
 			box_st1.setPreferredSize(new Dimension(200,370));
-			box_st1.add(new JScrollPane(show2));
+			box_st1.add(new JScrollPane(ta1));
 			Box abox_st = Box.createVerticalBox();
 			abox_st.add(Box.createVerticalStrut(30));
 			abox_st.add(sot,BorderLayout.CENTER);
@@ -218,18 +233,26 @@ public class StuScore extends JFrame{
 						
 					else if(a.getSource()==sot)
 					{
+						//show2.setText(null);
+						tableModel.setRowCount(0);
 						if(students.size()>0)
 						{
 							Collections.sort(students, new SortByScore());
-							show2.setText("学生成绩从高到低排序如下：\n\n");
+							//shows.setText("学生成绩从高到低排序如下：\n\n");
 							for(int i = 0; i<students.size(); i++)
 							{
-								show2.append("学号："+students.get(i).getSno()+" ,"+"成绩："+students.get(i).getScore()+"\r\n");
+								String []arr = new String[2];
+								arr[0] = students.get(i).getSno();
+								arr[1] = students.get(i).getScore()+"";
+								tableModel.addRow(arr);
+								//show2.append("学号："+students.get(i).getSno()+" , "+"成绩："+students.get(i).getScore()+"\r\n");
 							}
+							ta1.invalidate();
 						}
 						else
 						{
-							show2.setText("抱歉，暂无学生信息，无法排序！");
+							JOptionPane.showMessageDialog(null, "暂无学生信息无法排序！", "错误", JOptionPane.INFORMATION_MESSAGE);
+							//show2.setText("抱歉，暂无学生信息，无法排序！");
 						}
 					}
 			}
